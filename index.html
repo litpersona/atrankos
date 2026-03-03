@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Litpersona · Kandidatų Analizė</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0e;
+    --surface: #1a1917;
+    --surface2: #232220;
+    --border: #2e2c29;
+    --text: #f0ede8;
+    --text2: #9e9b96;
+    --text3: #5c5a56;
+    --accent: #e8c47a;
+    --accent2: #c4a456;
+    --green: #6dbd8a;
+    --red: #e07070;
+    --orange: #e0a060;
+    --blue: #6aabe0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+  .logo span { color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; margin-left: 10px; font-weight: 300; }
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .stat { text-align: right; }
+  .stat-n { font-family: 'DM Mono', monospace; font-size: 18px; color: var(--accent); }
+  .stat-l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* LAYOUT */
+  .main { display: flex; height: calc(100vh - 57px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 340px;
+    min-width: 340px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-top {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent2); }
+  .search-input::placeholder { color: var(--text3); }
+
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    color: var(--text2);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Mono', monospace;
+  }
+  .filter-btn:hover { border-color: var(--accent2); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 500; }
+  .fc {
+    display: inline-block;
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    padding: 0 5px;
+    font-size: 10px;
+    margin-left: 3px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .filter-btn.active .fc { background: rgba(0,0,0,0.25); }
+
+  .candidate-list { overflow-y: auto; flex: 1; }
+  .candidate-list::-webkit-scrollbar { width: 4px; }
+  .candidate-list::-webkit-scrollbar-track { background: transparent; }
+  .candidate-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .candidate-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .candidate-item:hover { background: var(--surface); }
+  .candidate-item.active { background: var(--surface2); border-left: 2px solid var(--accent); }
+
+  .ci-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    color: var(--accent2);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .ci-info { flex: 1; min-width: 0; }
+  .ci-name { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ci-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .ci-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .score-high { background: rgba(109,189,138,0.15); color: var(--green); }
+  .score-mid { background: rgba(224,160,96,0.15); color: var(--orange); }
+  .score-low { background: rgba(224,112,112,0.15); color: var(--red); }
+  .score-none { background: var(--surface2); color: var(--text3); }
+
+  /* MAIN PANEL */
+  .panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .panel::-webkit-scrollbar { width: 4px; }
+  .panel::-webkit-scrollbar-track { background: transparent; }
+  .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text3);
+  }
+  .empty-state-icon { font-size: 48px; opacity: 0.3; }
+  .empty-state-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text2); }
+  .empty-state-sub { font-size: 13px; text-align: center; max-width: 320px; line-height: 1.6; }
+
+  /* CANDIDATE DETAIL */
+  .candidate-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .big-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .ch-info h2 { font-family: 'DM Serif Display', serif; font-size: 24px; }
+  .ch-info .ch-meta { color: var(--text2); font-size: 13px; margin-top: 4px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .ch-meta a { color: var(--blue); text-decoration: none; }
+  .ch-meta a:hover { text-decoration: underline; }
+  .ch-actions { margin-left: auto; display: flex; gap: 8px; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    font-weight: 500;
+  }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* SKILLS GRID */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .skill-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .skill-value { font-size: 13px; font-weight: 500; line-height: 1.4; }
+
+  .level-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .level-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* AI ANALYSIS BOX */
+  .ai-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .ai-box-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ai-box-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .ai-dot.done { background: var(--green); animation: none; }
+  .ai-dot.idle { background: var(--text3); animation: none; }
+
+  .ai-box-body { padding: 18px; }
+  .ai-loading { color: var(--text3); font-style: italic; font-size: 13px; }
+
+  .ai-result { display: flex; flex-direction: column; gap: 16px; }
+  .ai-score-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .ai-score-big {
+    font-family: 'DM Mono', monospace;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .score-text-high { color: var(--green); }
+  .score-text-mid { color: var(--orange); }
+  .score-text-low { color: var(--red); }
+
+  .ai-score-detail { flex: 1; }
+  .ai-verdict { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 4px; }
+  .ai-pos-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: rgba(232,196,122,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(232,196,122,0.2);
+  }
+
+  .ai-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ai-section { }
+  .ai-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text3);
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+  .ai-bullets { display: flex; flex-direction: column; gap: 5px; }
+  .ai-bullet {
+    font-size: 13px;
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+    color: var(--text2);
+  }
+  .ai-bullet::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+  }
+  .ai-bullet.plus::before { content: '+'; color: var(--green); }
+  .ai-bullet.minus::before { content: '−'; color: var(--red); }
+
+  .ai-note {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text2);
+    padding: 12px;
+    background: var(--surface2);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent2);
+  }
+
+  /* CHAT */
+  .chat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .chat-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .chat-messages {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); }
+  .chat-msg {
+    max-width: 85%;
+    padding: 10px 13px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .chat-msg.user {
+    background: var(--accent);
+    color: var(--bg);
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+  .chat-msg.ai {
+    background: var(--surface2);
+    color: var(--text);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+    border: 1px solid var(--border);
+  }
+  .chat-input-row {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .chat-input:focus { border-color: var(--accent2); }
+  .chat-input::placeholder { color: var(--text3); }
+
+  /* OVERVIEW */
+  .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .ov-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .ov-n { font-family: 'DM Mono', monospace; font-size: 28px; color: var(--accent); }
+  .ov-l { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Litpersona <span>· Betonuotojų atranka</span></div>
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-n" id="total-count">—</div>
+      <div class="stat-l">Kandidatai</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" id="analyzed-count">0</div>
+      <div class="stat-l">Analizuota</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" id="top-count">0</div>
+      <div class="stat-l">Top kandidatai</div>
+    </div>
+    <button onclick="showApiKeyModal(()=>{})" style="padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">⚙ API raktas</button>
+    <span id="sync-status" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);">⟳ Jungiamasi...</span>
+  </div>
+</header>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <input class="search-input" placeholder="Ieškoti kandidato..." id="search-input" oninput="filterCandidates()">
+      <div class="filters" id="filters-row">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Visi <span class="fc" id="fc-all"></span></button>
+        <button class="filter-btn" data-filter="team-leader" onclick="setFilter('team-leader', this)">Team Leader <span class="fc" id="fc-team-leader"></span></button>
+        <button class="filter-btn" data-filter="narys" onclick="setFilter('narys', this)">Narys <span class="fc" id="fc-narys"></span></button>
+        <button class="filter-btn" data-filter="license" onclick="setFilter('license', this)">Vairuotojas <span class="fc" id="fc-license"></span></button>
+        <button class="filter-btn" data-filter="doka" onclick="setFilter('doka', this)">Doka/Peri <span class="fc" id="fc-doka"></span></button>
+      </div>
+    </div>
+    <div class="candidate-list" id="candidate-list"></div>
+  </div>
+
+  <div class="panel" id="main-panel">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-state-icon">⬜</div>
+      <div class="empty-state-title">Pasirinkite kandidatą</div>
+      <div class="empty-state-sub">Sąraše kairėje pasirinkite kandidatą, kad pamatytumėte detalią informaciją ir gautumėte AI analizę.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const RAW_DATA = `Timestamp	Jūsų vardas ir pavardė	Jūsų mob. tel. numeris	Jūsų el. pašto adresas	Kokia Jūsų patirtis dirbant su klojiniais (liaudiškai - "apalafkėm")?	Kokia Jūsų patirtis armatūros rišimo užduotyse?	Kokia patirtis dirbant su brėžiniais?	Kokiose pozicijoje Jūs esate stipriausias?	Ar turite galiojantį B kategorijos vairuotojo pažymėjimą?	Kada galite išvykti	Nurodykite įmones, kuriuose dirbote betonuotoju 2023 ir 2022 metais
+22/02/2023 17:10:23	Valdas lukosius	863631804	valdasluk.lukosius@gmail.com 	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Gelžbetonio elementų konstruktyvo montažo darbai (kolonos, sienos, perdangos)	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Ne		
+22/02/2023 17:11:08	Virginijus vaicikauskas	867092160	Virgisvaicikauskas@gmail.com	Moku dirbti su pramoniniais klojiniais Doka, Peri ir kt.	Gelžbetonio elementų konstruktyvo montažo darbai (kolonos, sienos, perdangos)	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Ne		
+22/02/2023 17:15:02	Aidas Rutkauskas	861380305	aidasrutkauskas68@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Gelžbetonio elementų konstruktyvo montažo darbai (kolonos, sienos, perdangos)	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip		
+22/02/2023 17:20:58	Ruslanas B	868329929	lialiume1987@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Maži projektai: dvibučių ir vienbučių namų pamatų paruošimo darbai, betono žiedo įrengimas	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip		
+22/02/2023 17:43:37	Antanas Charlapavičius	+37063453735	antanas.charl@gmail.com	Moku surinkti buitinius klojinius (pvz. iš medžio plokščių)	Maži projektai: dvibučių ir vienbučių namų pamatų paruošimo darbai, betono žiedo įrengimas	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Ne		
+23/02/2023 13:51:30	Darius Sadauskas	+37060763768	dariussadauskas99@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip		
+05/04/2023 17:09:52	Eligijus Bendikas	860411062	eligijus.bendikas@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Ne	kad ir rytoi	
+06/04/2023 10:27:12	Svajunas Česnauskas	+37065011549	Svajunascesnauskas@gmail.com	Moku dirbti su pramoniniais klojiniais Doka, Peri ir kt.	Gelžbetonio laiptų karkaso rišimas  (daugiabučių, mokyklų, verslo ventrų statyba)	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	2023 04 23	
+09/05/2023 09:05:08	Petras Jašinauskas	+37966450125	jasinauskaspetras0@gmail.com	Moku dirbti su pramoniniais klojiniais Doka, Peri ir kt.	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	Šia savaite	Bortą 2023
+20/06/2023 14:01:39	Paulius Sepetys	+37068402568	sepetys.paulius87@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Maži projektai: dvibučių ir vienbučių namų pamatų paruošimo darbai, betono žiedo įrengimas	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Ne	gavus pasiulima	UAB ''Stunexo''
+21/06/2023 16:23:16	Vilius Buzas	+37063894733		Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Suderinus visas sąlygas 	Dipwork
+14/06/2023 12:56:26	Almantas Danilevičius	8-683-18751	almantas.danilevicius@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Rudenį 	UAB Conres
+20/07/2023 07:08:57	Aurimas Cepaitis	+37065958208	aurys2008@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Nezinau	Pamatų ranga
+09/08/2023 16:50:16	Gracijus Paškevičius	+37068985872	grackap@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Nežinau 	Betono žmonės
+08/08/2023 10:34:51	Mantas Maselskis	+37066194292	mantas.maselskis1@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip	nuo Rugpjūčio 27	UAB Stunexo, AB Industri Beton
+28/09/2023 11:18:45	Zilvinas Kurlinskas	860320140	kurlinskas@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	Savaites begyje	Belstroj
+21/11/2023 12:44:00	Virgilijus Leonavicius	861529995	67.virgilijus@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	2024.01.08	davista
+11/01/2024 15:15:07	Marius Šlapelis	+37060734288	driegnas@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	2 savaičių bėgyje	uab galmina statyba uab šiaurės sprendimai
+19/01/2024 11:50:40	KASPARAS LUČIŪNAS	+37067721831	Kasparas.lu16@gmail.com	Moku dirbti su pramoniniais klojiniais Doka, Peri ir kt.	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Ne	Kad ir šiandien	Stabile, Inhus
+15/01/2024 08:38:08	Valdas Stackevičius	+37064131331	stackeviciusvaldas@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip	Vasario pabaigoje arba Kovo pradžioja.	UAB ŠIAURĖS SPRENDIMAI
+20/10/2023 11:15:49	Arvydas Gelzinis	+37068498650	arvydasnojus@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Tikrai ne šiandien	SCAC OY SUOMIJA
+15/04/2024 11:35:18	Osvaldas Gudaitis	+37066914482	osvaldasgudaitis32@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip	2024-05-15	MB IDO Namas
+03/07/2024 08:01:53	Laimondas Gylis	+37067477073	glaimondas@yahoo.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip	2024 09	Gandall Betong
+10/07/2024 21:05:51	Marius Dorinas	+37061016031	Mariusdorinas30@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Da nezinau	Litbygas
+08/08/2024 09:56:01	Nerijus Lakštutis	+37064676683	nerutis1978@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	Rugpjūčio 23-25	Osterhus
+18/06/2024 13:02:40	Igoris Scelkunovas	863793917	Igorisscelkunovas@gmail.com	Moku dirbti su pramoniniais klojiniais Doka, Peri ir kt.	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos "Team leader"	Ne	Viduti rugpjucio galiu. Nes teises laikau	TSH ehf Islandiska firma
+19/06/2024 11:35:42	Džastinas Malijonis	+37067872145	dzastinasmalijonis@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Gelžbetonio elementų konstruktyvo montažo darbai (kolonos, sienos, perdangos)	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	2024 07 10	UAB elemonta, Cebeco group
+15/10/2024 19:04:27	GIEDRIUS SEREIKA	+37061617851	giedrius.sereika1969@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	po nauju metu, t.y. nuo 2025.01 30	STOKKE BYGG norvegijoje
+15/11/2024 17:37:52	Svajunas Meška	+37060098310	sssvajunas@gmail.com	Moku dirbti su pramoniniais klojiniais Doka, Peri ir kt.	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	Esam sutare	Wolf sistema vokiečių Baltikon danų
+11/01/2024 18:43:27	Rolandas Lukosevicius	862486439	lukosevicius1975@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Maži projektai: dvibučių ir vienbučių namų pamatų paruošimo darbai, betono žiedo įrengimas	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos "Team leader"	Ne	Kuo greiciau	
+27/12/2024 14:37:33	Vytautas Juskys	862591118	vytulis1234@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Ne	25.01-02	
+13/10/2025 12:54:25	Vidmantas Lapėnas	062886449	vidmanats.lapenas@gmai.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	kovo menesi	mbmarciukai
+22/10/2025 16:25:31	Mantas Kirila	067055404	mkirila88@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Ne	Bet kuriuo jums patogiu metu	West construction ltd
+21/10/2025 13:33:31	Rimvydas Daugela	+37067772368	rimvydasdaugela@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Gelžbetonio elementų konstruktyvo montažo darbai (kolonos, sienos, perdangos)	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Lapkritis	
+27/10/2025 18:14:11	Rolandas Stolpovskis	+37062487444	rstolpovskis@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip	Kaip būsiu pasiruošias	Ukmergės gelžbetonis, Betosta
+02/01/2026 10:07:39	Arnas Vaičiūnas	+370 694 53152	Arnasace982@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos narys	Taip	Iskart	Snus masters, jarka bygg, gotiam eldfast, odd hansen
+09/01/2026 13:59:30	Martinas Espenko	066180966	Espenkomartinas05@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos "Team leader"	Taip	Savaitės bėgyje	AG construction
+27/02/2026 11:21:03	Andrius Kubilius	+38067835101	andriuskubilius30@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Gelžbetonio elementų konstruktyvo montažo darbai (kolonos, sienos, perdangos)	Suprantu sudėtingų konstrukcijų brėžinius ir galiu paaiškinti komandai ką ir kaip daryti	Betonuotojų komandos "Team leader"	Taip	Bet kada	2025 dirbau AG solution
+28/02/2026 20:41:16	Mantas Janulaitis	063090890	mantasjanulaitis24@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip	Artimiausiu metu	nuo 2021m iki 2024 rugsėjo mėnesio dirbau Dipwork įmonėje
+02/03/2026 16:44:11	Igor Persin	+37060354931	gavnjuk80@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Ne	Po savaites dvieju	Armando grupe.elviva
+02/03/2026 17:07:38	Tadas Naginionis	+37065369326	synukas1@gmail.com	Moku dirbti tiek su pramoniniais tiek su buitiniais klojiniais	Dideli projektai: požeminių parkingų, liftų šachtų, laiptinių, atraminių sienų armatūros karkaso rišimas dideliuose objekuose	Suprantu paprastų konstrukcijų (pvz. vienbučio pamatai) brėžinius	Betonuotojų komandos narys	Taip	Artimiausiu metu	Dipwork, Nordic Continental group`;
+
+// ─── PARSE ────────────────────────────────────────────────────────────────────
+function parseData(raw) {
+  const lines = raw.trim().split('\n');
+  const headers = lines[0].split('\t');
+  const seen = new Set();
+  const candidates = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split('\t');
+    const name = (cols[1] || '').trim();
+    if (!name || name.length < 3) continue;
+    const key = name.toLowerCase().replace(/\s+/g, '');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    candidates.push({
+      id: i,
+      timestamp: cols[0] || '',
+      name: name,
+      phone: (cols[2] || '').trim(),
+      email: (cols[3] || '').trim(),
+      klojinius: (cols[4] || '').trim(),
+      armatūra: (cols[5] || '').trim(),
+      brėžiniai: (cols[6] || '').trim(),
+      pozicija: (cols[7] || '').trim(),
+      vairuotojas: (cols[8] || '').trim(),
+      išvykti: (cols[9] || '').trim(),
+      įmonės: (cols[10] || '').trim(),
+      score: null,
+      analysis: null
+    });
+  }
+  return candidates;
+}
+
+const candidates = parseData(RAW_DATA);
+let currentCandidate = null;
+let activeFilter = 'all';
+let chatHistory = [];
+let analyzedCount = 0;
+let topCount = 0;
+
+// Init
+document.getElementById('total-count').textContent = candidates.length;
+
+// ─── SCORING HELPERS ──────────────────────────────────────────────────────────
+function quickScore(c) {
+  let s = 0;
+  if (c.klojinius.includes('pramoniniais tiek su buitiniais')) s += 3;
+  else if (c.klojinius.includes('pramoniniais klojiniais Doka')) s += 2;
+  else if (c.klojinius.includes('buitinius klojinius')) s += 1;
+  if (c.armatūra.includes('Dideli projektai')) s += 3;
+  else if (c.armatūra.includes('montažo darbai')) s += 2;
+  else if (c.armatūra.includes('laiptų karkaso')) s += 2;
+  else if (c.armatūra.includes('Maži projektai')) s += 1;
+  if (c.brėžiniai.includes('sudėtingų')) s += 3;
+  else if (c.brėžiniai.includes('paprastų')) s += 2;
+  if (c.pozicija.includes('Team leader')) s += 2;
+  if (c.vairuotojas === 'Taip') s += 1;
+  if (c.įmonės && c.įmonės.length > 3) s += 1;
+  return Math.min(Math.round((s / 13) * 100), 100);
+}
+
+function scoreClass(s) {
+  if (s >= 75) return 'score-high';
+  if (s >= 45) return 'score-mid';
+  return 'score-low';
+}
+function scoreTextClass(s) {
+  if (s >= 75) return 'score-text-high';
+  if (s >= 45) return 'score-text-mid';
+  return 'score-text-low';
+}
+
+function initials(name) {
+  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+}
+
+// ─── FILTER & RENDER LIST ─────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function matchesFilter(c, f) {
+  if (f === 'team-leader') return c.pozicija.includes('Team leader');
+  if (f === 'narys') return c.pozicija.includes('narys') && !c.pozicija.includes('Team');
+  if (f === 'license') return c.vairuotojas === 'Taip';
+  if (f === 'doka') return c.klojinius.includes('Doka') || c.klojinius.includes('pramoniniais tiek');
+  return true;
+}
+
+function updateFilterCounts(search) {
+  const filters = ['all', 'team-leader', 'narys', 'license', 'doka'];
+  filters.forEach(f => {
+    const count = candidates.filter(c => {
+      if (search && !c.name.toLowerCase().includes(search) && !c.phone.includes(search)) return false;
+      return matchesFilter(c, f);
+    }).length;
+    const el = document.getElementById('fc-' + f);
+    if (el) el.textContent = count;
+  });
+}
+
+function filterCandidates() { renderList(); }
+
+function renderList() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  updateFilterCounts(search);
+  const list = document.getElementById('candidate-list');
+  list.innerHTML = '';
+  const filtered = candidates.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search) && !c.phone.includes(search)) return false;
+    return matchesFilter(c, activeFilter);
+  });
+
+  filtered.forEach(c => {
+    const qs = c.score !== null ? c.score : quickScore(c);
+    const item = document.createElement('div');
+    item.className = 'candidate-item' + (currentCandidate?.id === c.id ? ' active' : '');
+    item.onclick = () => selectCandidate(c);
+    item.innerHTML = `
+      <div class="ci-avatar">${initials(c.name)}</div>
+      <div class="ci-info">
+        <div class="ci-name">${c.name}</div>
+        <div class="ci-meta">${c.pozicija.replace('Betonuotojų komandos ', '').replace('"Team leader"','TL')}</div>
+      </div>
+      <div class="ci-score ${c.analysis ? scoreClass(qs) : 'score-none'}">${c.analysis ? qs : '—'}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ─── SELECT CANDIDATE ─────────────────────────────────────────────────────────
+function selectCandidate(c) {
+  currentCandidate = c;
+  chatHistory = [];
+  renderList();
+  renderDetail(c);
+}
+
+function renderDetail(c) {
+  const qs = quickScore(c);
+  const panel = document.getElementById('main-panel');
+  panel.innerHTML = `
+    <div class="candidate-header">
+      <div class="big-avatar">${initials(c.name)}</div>
+      <div class="ch-info">
+        <h2>${c.name}</h2>
+        <div class="ch-meta">
+          <span>📞 <a href="tel:${c.phone}">${c.phone}</a></span>
+          ${c.email ? `<span>✉ <a href="mailto:${c.email}">${c.email}</a></span>` : ''}
+          <span>📅 ${c.timestamp}</span>
+        </div>
+      </div>
+      <div class="ch-actions">
+        <button class="btn btn-secondary" onclick="copyContact()">Kopijuoti kontaktą</button>
+        <button class="btn btn-primary" id="analyze-btn" onclick="analyzeCandidate()">✦ Analizuoti su AI</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Įgūdžiai ir patirtis</div>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <div class="skill-label">Klojiniai</div>
+          <div class="skill-value">${c.klojinius}</div>
+          <div class="level-bar"><div class="level-fill" style="width:${klojiLevel(c.klojinius)}%; background:var(--accent)"></div></div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-label">Armatūra</div>
+          <div class="skill-value">${c.armatūra}</div>
+          <div class="level-bar"><div class="level-fill" style="width:${armatLevel(c.armatūra)}%; background:var(--green)"></div></div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-label">Brėžiniai</div>
+          <div class="skill-value">${c.brėžiniai}</div>
+          <div class="level-bar"><div class="level-fill" style="width:${brezLevel(c.brėžiniai)}%; background:var(--blue)"></div></div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-label">Pageidaujama pozicija</div>
+          <div class="skill-value">${c.pozicija}</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-label">Vairuotojo pažymėjimas</div>
+          <div class="skill-value" style="color:${c.vairuotojas==='Taip'?'var(--green)':'var(--red)'}">${c.vairuotojas || 'Nenurodyta'}</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-label">Kada gali išvykti</div>
+          <div class="skill-value">${c.išvykti || 'Nenurodyta'}</div>
+        </div>
+      </div>
+    </div>
+
+    ${c.įmonės ? `
+    <div>
+      <div class="section-title">Ankstesnės įmonės</div>
+      <div class="skill-card">
+        <div class="skill-value">${c.įmonės}</div>
+      </div>
+    </div>` : ''}
+
+    <div id="ai-analysis-box">
+      ${c.analysis ? renderAnalysisHTML(c.analysis, c.score) : `
+      <div class="ai-box">
+        <div class="ai-box-header">
+          <div class="ai-box-title"><div class="ai-dot idle"></div> AI Analizė</div>
+        </div>
+        <div class="ai-box-body">
+          <div class="ai-loading">Paspauskite „Analizuoti su AI" mygtuką, kad gautumėte detalią kandidato analizę.</div>
+        </div>
+      </div>`}
+    </div>
+
+    <div class="chat-box" id="chat-section" style="${c.analysis ? '' : 'display:none'}">
+      <div class="chat-header">Pokalbis apie kandidatą</div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" placeholder="Užduokite klausimą apie šį kandidatą..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()" id="chat-send-btn">Siųsti</button>
+      </div>
+    </div>
+  `;
+  if (c.analysis) renderChatMessages();
+}
+
+function klojiLevel(v) {
+  if (v.includes('pramoniniais tiek su buitiniais')) return 100;
+  if (v.includes('Doka')) return 80;
+  if (v.includes('buitinius')) return 40;
+  if (v.includes('nemoku')) return 5;
+  return 20;
+}
+function armatLevel(v) {
+  if (v.includes('Dideli')) return 100;
+  if (v.includes('montažo')) return 80;
+  if (v.includes('laiptų')) return 70;
+  if (v.includes('Maži')) return 40;
+  if (v.includes('neteko')) return 5;
+  return 15;
+}
+function brezLevel(v) {
+  if (v.includes('sudėtingų')) return 100;
+  if (v.includes('paprastų')) return 60;
+  if (v.includes('neturiu')) return 5;
+  return 20;
+}
+
+// ─── AI ANALYSIS ──────────────────────────────────────────────────────────────
+async function analyzeCandidate() {
+  if (!currentCandidate) return;
+  const apiKey = getApiKey();
+  if (!apiKey) { showApiKeyModal(() => analyzeCandidate()); return; }
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true; btn.textContent = 'Analizuojama...';
+
+  const box = document.getElementById('ai-analysis-box');
+  box.innerHTML = `
+    <div class="ai-box">
+      <div class="ai-box-header">
+        <div class="ai-box-title"><div class="ai-dot"></div> AI analizuoja...</div>
+      </div>
+      <div class="ai-box-body"><div class="ai-loading">Claude analizuoja kandidato duomenis...</div></div>
+    </div>`;
+
+  const c = currentCandidate;
+  const prompt = `Tu esi statybų įmonės atrankos specialistas. Analizuok šio betonuotojo kandidato duomenis ir pateik struktūruotą ataskaitą JSON formatu.
+
+Kandidato duomenys:
+- Vardas: ${c.name}
+- Klojiniai: ${c.klojinius}
+- Armatūra: ${c.armatūra}
+- Brėžiniai: ${c.brėžiniai}
+- Pageidaujama pozicija: ${c.pozicija}
+- Vairuotojo pažymėjimas: ${c.vairuotojas}
+- Kada gali išvykti: ${c.išvykti || 'nenurodyta'}
+- Ankstesnės įmonės: ${c.įmonės || 'nenurodyta'}
+
+Grąžink TIK JSON objektą (be markdown):
+{
+  "score": <0-100 skaičius>,
+  "verdict": "<trumpas apibūdinimas, pvz. 'Stiprus kandidatas' arba 'Vidutinis specialistas'>",
+  "level": "<'high'|'mid'|'low'>",
+  "strengths": ["<stiprybė 1>", "<stiprybė 2>", "<stiprybė 3>"],
+  "weaknesses": ["<silpnybė 1>", "<silpnybė 2>"],
+  "recommendation": "<1-2 sakiniai ką rekomenduojate daryti su šiuo kandidatu>",
+  "suitable_for": "<kokiems projektams tinka>"
+}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content.map(b => b.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const analysis = JSON.parse(clean);
+
+    currentCandidate.analysis = analysis;
+    currentCandidate.score = analysis.score;
+    analyzedCount++;
+    if (analysis.score >= 75) topCount++;
+    document.getElementById('analyzed-count').textContent = analyzedCount;
+    document.getElementById('top-count').textContent = topCount;
+
+    box.innerHTML = renderAnalysisHTML(analysis, analysis.score);
+    document.getElementById('chat-section').style.display = '';
+    renderChatMessages();
+    renderList();
+    if (btn) { btn.disabled = false; btn.textContent = '✦ Iš naujo analizuoti'; }
+  } catch (e) {
+    box.innerHTML = `<div class="ai-box"><div class="ai-box-body"><div class="ai-loading">Klaida: ${e.message}</div></div></div>`;
+    if (btn) { btn.disabled = false; btn.textContent = '✦ Analizuoti su AI'; }
+  }
+}
+
+function renderAnalysisHTML(a, score) {
+  return `
+  <div class="ai-box">
+    <div class="ai-box-header">
+      <div class="ai-box-title"><div class="ai-dot done"></div> AI Analizė</div>
+      <div class="ai-pos-tag">${a.suitable_for || ''}</div>
+    </div>
+    <div class="ai-box-body">
+      <div class="ai-result">
+        <div class="ai-score-row">
+          <div class="ai-score-big ${scoreTextClass(score)}">${score}</div>
+          <div class="ai-score-detail">
+            <div class="ai-verdict">${a.verdict}</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px">Bendras įvertinimas iš 100</div>
+          </div>
+        </div>
+        <div class="ai-sections">
+          <div class="ai-section">
+            <div class="ai-section-title">Stiprybės</div>
+            <div class="ai-bullets">
+              ${(a.strengths || []).map(s => `<div class="ai-bullet plus">${s}</div>`).join('')}
+            </div>
+          </div>
+          <div class="ai-section">
+            <div class="ai-section-title">Silpnybės</div>
+            <div class="ai-bullets">
+              ${(a.weaknesses || []).map(s => `<div class="ai-bullet minus">${s}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="ai-note">${a.recommendation}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── CHAT ─────────────────────────────────────────────────────────────────────
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg || !currentCandidate) return;
+  const apiKey = getApiKey();
+  if (!apiKey) { showApiKeyModal(() => {}); return; }
+  input.value = '';
+
+  chatHistory.push({ role: 'user', content: msg });
+  renderChatMessages();
+
+  const btn = document.getElementById('chat-send-btn');
+  btn.disabled = true;
+
+  const c = currentCandidate;
+  const systemCtx = `Tu esi statybų įmonės atrankos specialistas. Atsakyk lietuviškai, trumpai ir konkrečiai.
+Kandidato duomenys: ${c.name}, klojiniai: ${c.klojinius}, armatūra: ${c.armatūra}, brėžiniai: ${c.brėžiniai}, pozicija: ${c.pozicija}, vairuotojas: ${c.vairuotojas}, išvykti: ${c.išvykti}, įmonės: ${c.įmonės}.
+${c.analysis ? `AI įvertinimas: ${c.analysis.score}/100, ${c.analysis.verdict}` : ''}`;
+
+  const messages = [
+    { role: 'user', content: systemCtx + '\n\nKlausimas: ' + chatHistory[0].content },
+    ...chatHistory.slice(1)
+  ];
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages
+      })
+    });
+    const data = await resp.json();
+    const reply = data.content.map(b => b.text || '').join('');
+    chatHistory.push({ role: 'assistant', content: reply });
+    renderChatMessages();
+  } catch (e) {
+    chatHistory.push({ role: 'assistant', content: 'Klaida: ' + e.message });
+    renderChatMessages();
+  }
+  btn.disabled = false;
+}
+
+function renderChatMessages() {
+  const el = document.getElementById('chat-messages');
+  if (!el) return;
+  if (chatHistory.length === 0) {
+    el.innerHTML = `<div style="color:var(--text3);font-size:13px;text-align:center;padding:12px">Užduokite klausimą apie šį kandidatą...</div>`;
+    return;
+  }
+  el.innerHTML = chatHistory.map(m => `
+    <div class="chat-msg ${m.role === 'user' ? 'user' : 'ai'}">${m.content.replace(/\n/g,'<br>')}</div>
+  `).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function copyContact() {
+  if (!currentCandidate) return;
+  const c = currentCandidate;
+  const text = `${c.name}\n${c.phone}\n${c.email}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    if (btn) { btn.textContent = 'Nukopijuota!'; setTimeout(() => btn.textContent = 'Kopijuoti kontaktą', 2000); }
+  });
+}
+
+// ─── API KEY ──────────────────────────────────────────────────────────────────
+function getApiKey() {
+  return sessionStorage.getItem('lp_api_key') || '';
+}
+
+function showApiKeyModal(onSuccess) {
+  const existing = document.getElementById('api-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'api-modal';
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;
+    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+  `;
+  modal.innerHTML = `
+    <div style="background:#1a1917;border:1px solid #2e2c29;border-radius:12px;padding:32px;width:420px;max-width:90vw;">
+      <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px;color:#f0ede8;">API raktas</div>
+      <div style="font-size:13px;color:#9e9b96;margin-bottom:20px;line-height:1.6;">
+        Įveskite savo Anthropic API raktą. Jis bus saugomas tik jūsų naršyklėje ir niekur nebus siunčiamas.
+      </div>
+      <input id="modal-key-input" type="password"
+        placeholder="sk-ant-..."
+        style="width:100%;background:#232220;border:1px solid #2e2c29;border-radius:6px;
+               padding:10px 14px;color:#f0ede8;font-family:'DM Mono',monospace;font-size:13px;
+               outline:none;margin-bottom:8px;"
+      />
+      <div id="modal-error" style="font-size:12px;color:#e07070;margin-bottom:12px;display:none;">
+        Neteisingas raktas. Įsitikinkite, kad prasideda sk-ant-...
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="document.getElementById('api-modal').remove()"
+          style="padding:9px 18px;background:#232220;border:1px solid #2e2c29;border-radius:6px;
+                 color:#9e9b96;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">
+          Atšaukti
+        </button>
+        <button onclick="saveApiKey()"
+          style="padding:9px 18px;background:#e8c47a;border:none;border-radius:6px;
+                 color:#0f0f0e;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
+          Išsaugoti
+        </button>
+      </div>
+      <div style="margin-top:16px;font-size:11px;color:#5c5a56;text-align:center;">
+        Neturite rakto? → <a href="https://console.anthropic.com" target="_blank" style="color:#6aabe0;">console.anthropic.com</a>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById('modal-key-input').focus();
+  document.getElementById('modal-key-input').onkeydown = e => { if(e.key==='Enter') saveApiKey(); };
+  window._apiKeyCallback = onSuccess;
+}
+
+function saveApiKey() {
+  const val = document.getElementById('modal-key-input').value.trim();
+  if (!val.startsWith('sk-ant-')) {
+    document.getElementById('modal-error').style.display = 'block';
+    return;
+  }
+  sessionStorage.setItem('lp_api_key', val);
+  document.getElementById('api-modal').remove();
+  if (window._apiKeyCallback) window._apiKeyCallback();
+}
+
+// ─── FIREBASE ────────────────────────────────────────────────────────────────
+const FIREBASE_URL = 'https://atrankos-caec6-default-rtdb.firebaseio.com/candidates';
+
+let firebaseLoaded = false;
+
+function showSyncStatus(msg, color) {
+  const el = document.getElementById('sync-status');
+  if (el) { el.textContent = msg; el.style.color = color || 'var(--text3)'; }
+}
+
+async function loadFromFirebase() {
+  showSyncStatus('⟳ Kraunama...', 'var(--accent)');
+  try {
+    const resp = await fetch(FIREBASE_URL + '.json');
+    const data = await resp.json();
+    if (data) {
+      const incoming = Object.values(data);
+      mergeFirebaseCandidates(incoming);
+    }
+    showSyncStatus('● Prisijungta', 'var(--green)');
+    firebaseLoaded = true;
+  } catch(e) {
+    showSyncStatus('✕ Klaida', 'var(--red)');
+    console.error('Firebase load error:', e);
+  }
+}
+
+function mapFirebaseCandidate(raw, index) {
+  // Map Google Sheets column names to app fields
+  const keys = Object.keys(raw);
+  const get = (...searches) => {
+    for (const s of searches) {
+      const k = keys.find(k => k.toLowerCase().includes(s.toLowerCase()));
+      if (k) return (raw[k] || '').toString().trim();
+    }
+    return '';
+  };
+  return {
+    id: raw.id || raw.timestamp_unix || (Date.now() + index),
+    timestamp: get('Timestamp', 'timestamp'),
+    name: get('vardas ir pavardė', 'vardas', 'name'),
+    phone: get('mob. tel', 'phone', 'tel'),
+    email: get('el. pašto', 'email'),
+    klojinius: get('klojiniais', 'klojinius'),
+    armatūra: get('armatūros', 'armatura'),
+    brėžiniai: get('brėžiniais', 'breziniais'),
+    pozicija: get('pozicijoje', 'pozicija'),
+    vairuotojas: get('vairuotojo', 'vairuotojas'),
+    išvykti: get('išvykti', 'isvykti'),
+    įmonės: get('įmones', 'imones', 'įmonės'),
+    score: null,
+    analysis: null,
+    _raw: raw
+  };
+}
+
+function mergeFirebaseCandidates(incoming) {
+  const existingIds = new Set(candidates.map(c => c.name.toLowerCase().trim()));
+  let addedCount = 0;
+  incoming.forEach((raw, i) => {
+    const mapped = mapFirebaseCandidate(raw, i);
+    if (!mapped.name || mapped.name.length < 2) return;
+    const key = mapped.name.toLowerCase().trim();
+    if (!existingIds.has(key)) {
+      candidates.unshift(mapped); // new ones at top
+      existingIds.add(key);
+      addedCount++;
+    }
+  });
+  document.getElementById('total-count').textContent = candidates.length;
+  renderList();
+  return addedCount;
+}
+
+// Realtime polling — check for new entries every 15 seconds
+function startRealtimeSync() {
+  let lastCount = 0;
+  async function poll() {
+    try {
+      const resp = await fetch(FIREBASE_URL + '.json?shallow=true');
+      const data = await resp.json();
+      if (!data) return;
+      const count = Object.keys(data).length;
+      if (count !== lastCount) {
+        lastCount = count;
+        const added = await loadAndMerge();
+        if (added > 0) showNewCandidateToast(added);
+      }
+      showSyncStatus('● Prisijungta', 'var(--green)');
+    } catch(e) {
+      showSyncStatus('✕ Ryšio klaida', 'var(--red)');
+    }
+  }
+  setInterval(poll, 15000);
+}
+
+async function loadAndMerge() {
+  try {
+    const resp = await fetch(FIREBASE_URL + '.json');
+    const data = await resp.json();
+    if (!data) return 0;
+    return mergeFirebaseCandidates(Object.values(data));
+  } catch(e) { return 0; }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('total-count').textContent = candidates.length;
+renderList();
+if (!getApiKey()) showApiKeyModal(() => {});
+
+// Load from Firebase on start, then begin realtime polling
+loadFromFirebase().then(() => startRealtimeSync());
+
+
+</script>
+</body>
+</html>
