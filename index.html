@@ -485,7 +485,6 @@
       <div class="stat-n" id="top-count">0</div>
       <div class="stat-l">Top kandidatai</div>
     </div>
-    <button onclick="showApiKeyModal(()=>{})" style="padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text3);font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">⚙ API raktas</button>
     <span id="sync-status" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);">⟳ Jungiamasi...</span>
   </div>
 </header>
@@ -996,9 +995,11 @@ function copyContact() {
   });
 }
 
-// ─── API KEY ──────────────────────────────────────────────────────────────────
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+const _k = atob('c2stYW50LWFwaTAzLUh2bldrUl9sbXdQb25SNGFpdWhoRTZMeVdHbVIyWW5XbC1xUUM5Rzc2cjZFOTZLVFpfMFhfM3c4UlV6U3VHOXpEU1lxeVNKTkNHakRqX2VnN29fR1Etb1BkUTFBQQ==');
+
 function getApiKey() {
-  return sessionStorage.getItem('lp_api_key') || '';
+  return sessionStorage.getItem('lp_unlocked') === '1' ? _k : '';
 }
 
 function showApiKeyModal(onSuccess) {
@@ -1012,53 +1013,47 @@ function showApiKeyModal(onSuccess) {
     display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
   `;
   modal.innerHTML = `
-    <div style="background:#1a1917;border:1px solid #2e2c29;border-radius:12px;padding:32px;width:420px;max-width:90vw;">
-      <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px;color:#f0ede8;">API raktas</div>
-      <div style="font-size:13px;color:#9e9b96;margin-bottom:20px;line-height:1.6;">
-        Įveskite savo Anthropic API raktą. Jis bus saugomas tik jūsų naršyklėje ir niekur nebus siunčiamas.
+    <div style="background:#1a1917;border:1px solid #2e2c29;border-radius:12px;padding:32px;width:380px;max-width:90vw;">
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;color:#f0ede8;">Litpersona</div>
+      <div style="font-size:13px;color:#9e9b96;margin-bottom:24px;line-height:1.6;">
+        Įveskite prieigos slaptažodį
       </div>
-      <input id="modal-key-input" type="password"
-        placeholder="sk-ant-..."
+      <input id="modal-pin-input" type="password"
+        placeholder="Slaptažodis..."
         style="width:100%;background:#232220;border:1px solid #2e2c29;border-radius:6px;
-               padding:10px 14px;color:#f0ede8;font-family:'DM Mono',monospace;font-size:13px;
-               outline:none;margin-bottom:8px;"
+               padding:10px 14px;color:#f0ede8;font-family:'DM Mono',monospace;font-size:15px;
+               outline:none;margin-bottom:8px;letter-spacing:2px;"
       />
       <div id="modal-error" style="font-size:12px;color:#e07070;margin-bottom:12px;display:none;">
-        Neteisingas raktas. Įsitikinkite, kad prasideda sk-ant-...
+        Neteisingas slaptažodis. Bandykite dar kartą.
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button onclick="document.getElementById('api-modal').remove()"
-          style="padding:9px 18px;background:#232220;border:1px solid #2e2c29;border-radius:6px;
-                 color:#9e9b96;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">
-          Atšaukti
-        </button>
-        <button onclick="saveApiKey()"
-          style="padding:9px 18px;background:#e8c47a;border:none;border-radius:6px;
-                 color:#0f0f0e;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
-          Išsaugoti
-        </button>
-      </div>
-      <div style="margin-top:16px;font-size:11px;color:#5c5a56;text-align:center;">
-        Neturite rakto? → <a href="https://console.anthropic.com" target="_blank" style="color:#6aabe0;">console.anthropic.com</a>
-      </div>
+      <button onclick="checkPin()"
+        style="width:100%;padding:11px;background:#e8c47a;border:none;border-radius:6px;
+               color:#0f0f0e;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
+        Prisijungti
+      </button>
     </div>
   `;
   document.body.appendChild(modal);
-  document.getElementById('modal-key-input').focus();
-  document.getElementById('modal-key-input').onkeydown = e => { if(e.key==='Enter') saveApiKey(); };
+  document.getElementById('modal-pin-input').focus();
+  document.getElementById('modal-pin-input').onkeydown = e => { if(e.key==='Enter') checkPin(); };
   window._apiKeyCallback = onSuccess;
 }
 
-function saveApiKey() {
-  const val = document.getElementById('modal-key-input').value.trim();
-  if (!val.startsWith('sk-ant-')) {
+function checkPin() {
+  const val = document.getElementById('modal-pin-input').value.trim();
+  if (val === 'programeriZ') {
+    sessionStorage.setItem('lp_unlocked', '1');
+    document.getElementById('api-modal').remove();
+    if (window._apiKeyCallback) window._apiKeyCallback();
+  } else {
     document.getElementById('modal-error').style.display = 'block';
-    return;
+    document.getElementById('modal-pin-input').value = '';
+    document.getElementById('modal-pin-input').focus();
   }
-  sessionStorage.setItem('lp_api_key', val);
-  document.getElementById('api-modal').remove();
-  if (window._apiKeyCallback) window._apiKeyCallback();
 }
+
+function saveApiKey() { checkPin(); }
 
 // ─── FIREBASE ────────────────────────────────────────────────────────────────
 const FIREBASE_URL = 'https://atrankos-caec6-default-rtdb.firebaseio.com/candidates';
